@@ -5,6 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
 import { teardownWorkflowCronsIfIdle } from "./agent-cron.js";
+import { loadRelevantLearnings } from "./learnings.js";
 
 /**
  * Fire-and-forget cron teardown when a run ends.
@@ -282,6 +283,15 @@ export function claimStep(agentId: string): ClaimResult {
   ).get(step.run_id) as { cnt: number };
   if (hasStories.cnt > 0) {
     context["progress"] = readProgressFile(step.run_id);
+  }
+
+  // Inject relevant learnings from previous runs
+  if (context["repo"] && !context["learnings"]) {
+    const learnings = loadRelevantLearnings(context["repo"], context["task"] ?? "", []);
+    if (learnings) {
+      context["learnings"] = learnings;
+      db.prepare("UPDATE runs SET context = ?, updated_at = datetime('now') WHERE id = ?").run(JSON.stringify(context), step.run_id);
+    }
   }
 
   const resolvedInput = resolveTemplate(step.input_template, context);

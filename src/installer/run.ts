@@ -4,6 +4,7 @@ import { resolveWorkflowDir } from "./paths.js";
 import { getDb } from "../db.js";
 import { logger } from "../lib/logger.js";
 import { ensureWorkflowCrons } from "./agent-cron.js";
+import { loadRelevantLearnings } from "./learnings.js";
 
 export async function runWorkflow(params: {
   workflowId: string;

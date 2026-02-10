@@ -75,6 +75,17 @@ agents:
         SOUL.md: ../../agents/shared/pr/SOUL.md
         IDENTITY.md: ../../agents/shared/pr/IDENTITY.md
 
+  - id: compound
+    name: Compound
+    role: compound
+    description: Captures learnings from the completed workflow for future runs.
+    workspace:
+      baseDir: agents/compound
+      files:
+        AGENTS.md: ../../agents/shared/compound/AGENTS.md
+        SOUL.md: ../../agents/shared/compound/SOUL.md
+        IDENTITY.md: ../../agents/shared/compound/IDENTITY.md
+
 steps:
   - id: triage
     agent: triager
@@ -280,6 +291,44 @@ steps:
       Reply with:
       STATUS: done
       PR: URL to the pull request
+    expects: "STATUS: done"
+    on_fail:
+      escalate_to: human
+
+  - id: compound
+    agent: compound
+    input: |
+      Reflect on the completed bug fix workflow and capture learnings.
+
+      BUG REPORT:
+      {{task}}
+
+      REPO: {{repo}}
+      BRANCH: {{branch}}
+      SEVERITY: {{severity}}
+      ROOT_CAUSE: {{root_cause}}
+      CHANGES: {{changes}}
+
+      PREVIOUS LEARNINGS (if any):
+      {{learnings}}
+
+      Instructions:
+      1. cd into the repo
+      2. Review the git log, the fix, and the verification results
+      3. Reflect on:
+         - What went well
+         - What failed or was harder than expected
+         - Patterns/anti-patterns discovered (especially debugging techniques)
+         - Reusable solutions or snippets
+      4. Create `docs/learnings/` directory if it doesn't exist
+      5. Write a learning file: `docs/learnings/YYYY-MM-DD-<brief-slug>.md`
+      6. Use YAML frontmatter with date, workflow: bug-fix, task, and tags
+      7. Commit: docs: compound learnings from {{branch}}
+      8. Push the commit
+
+      Reply with:
+      STATUS: done
+      LEARNINGS_FILE: path to the file created
     expects: "STATUS: done"
     on_fail:
       escalate_to: human

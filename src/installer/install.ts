@@ -93,6 +93,16 @@ const ROLE_TOOL_POLICIES: Record<AgentRole, { profile?: string; alsoAllow?: stri
       "group:ui",                      // no browser/canvas
     ],
   },
+
+  // compound: read + write (creates learnings files) + exec, no browser
+  compound: {
+    profile: "coding",
+    deny: [
+      ...ALWAYS_DENY,
+      "image", "tts",                  // unnecessary
+      "group:ui",                      // no browser/canvas
+    ],
+  },
 };
 
 const SUBAGENT_POLICY = { allowAgents: [] as string[] };
@@ -109,6 +119,7 @@ function inferRole(agentId: string): AgentRole {
   if (id.includes("tester")) return "testing";
   if (id.includes("scanner")) return "scanning";
   if (id === "pr" || id.includes("/pr")) return "pr";
+  if (id.includes("compound")) return "compound";
   // developer, fixer, setup → coding
   return "coding";
 }
