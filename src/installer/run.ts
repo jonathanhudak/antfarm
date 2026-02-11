@@ -4,6 +4,7 @@ import { resolveWorkflowDir } from "./paths.js";
 import { getDb } from "../db.js";
 import { logger } from "../lib/logger.js";
 import { ensureWorkflowCrons } from "./agent-cron.js";
+import { registerWorkflowAgents } from "./lazy-agents.js";
 import { loadRelevantLearnings } from "./learnings.js";
 
 export async function runWorkflow(params: {
@@ -12,6 +13,10 @@ export async function runWorkflow(params: {
 }): Promise<{ id: string; workflowId: string; task: string; status: string }> {
   const workflowDir = resolveWorkflowDir(params.workflowId);
   const workflow = await loadWorkflowSpec(workflowDir);
+
+  // Lazy agent registration: add agents to openclaw.json only when a run starts
+  await registerWorkflowAgents(workflow.id, workflowDir);
+
   const db = getDb();
   const now = new Date().toISOString();
   const runId = crypto.randomUUID();
