@@ -75,6 +75,17 @@ agents:
         SOUL.md: ../../agents/shared/pr/SOUL.md
         IDENTITY.md: ../../agents/shared/pr/IDENTITY.md
 
+  - id: demo
+    name: Demo
+    role: verification
+    description: Creates a Showboat proof-of-work document demonstrating the fix.
+    workspace:
+      baseDir: agents/demo
+      files:
+        AGENTS.md: ../../agents/shared/demo/AGENTS.md
+        SOUL.md: ../../agents/shared/demo/SOUL.md
+        IDENTITY.md: ../../agents/shared/demo/IDENTITY.md
+
   - id: compound
     name: Compound
     role: compound
@@ -291,6 +302,35 @@ steps:
       Reply with:
       STATUS: done
       PR: URL to the pull request
+    expects: "STATUS: done"
+    on_fail:
+      escalate_to: human
+
+  - id: demo
+    agent: demo
+    input: |
+      Create a Showboat demo proving this bug fix works.
+
+      REPO: {{repo}}
+      BRANCH: {{branch}}
+      PROBLEM_STATEMENT: {{problem_statement}}
+      ROOT_CAUSE: {{root_cause}}
+      CHANGES: {{changes}}
+      TEST_CMD: {{test_cmd}}
+
+      Instructions:
+      1. cd into the repo, checkout the branch
+      2. Run `uvx showboat --help` to learn the tool
+      3. Create `demos/` directory if needed
+      4. Build a demo document showing:
+         a. The regression test passing (proves the fix works)
+         b. The specific behavior that was broken, now working
+         c. Any relevant command output showing correct behavior
+      5. Commit and push: `docs: showboat demo for {{branch}}`
+
+      Reply with:
+      STATUS: done
+      DEMO_FILE: path to the demo document
     expects: "STATUS: done"
     on_fail:
       escalate_to: human
